@@ -3,20 +3,20 @@ from dataclasses import is_dataclass
 from itertools import zip_longest
 from typing import TypeVar, Type, Optional, get_type_hints, Mapping, Any
 
-from dacite.config import Config
-from dacite.data import Data
-from dacite.dataclasses import get_default_value_for_field, create_instance, DefaultValueNotFoundError, get_fields
-from dacite.exceptions import (
+from tonalite.config import Config
+from tonalite.data import Data
+from tonalite.dataclasses import get_default_value_for_field, create_instance, DefaultValueNotFoundError, get_fields
+from tonalite.exceptions import (
     ForwardReferenceError,
     WrongTypeError,
-    DaciteError,
+    TonaliteError,
     UnionMatchError,
     MissingValueError,
-    DaciteFieldError,
+    TonaliteFieldError,
     UnexpectedDataError,
     StrictUnionMatchError,
 )
-from dacite.types import (
+from tonalite.types import (
     is_instance,
     is_generic_collection,
     is_union,
@@ -61,7 +61,7 @@ def from_dict(data_class: Type[T], data: Data, config: Optional[Config] = None) 
                     type_hooks=config.type_hooks, cast=config.cast, target_type=field.type, value=field_data
                 )
                 value = _build_value(type_=field.type, data=transformed_value, config=config)
-            except DaciteFieldError as error:
+            except TonaliteFieldError as error:
                 error.update_path(field.name)
                 raise
             if config.check_types and not is_instance(value, field.type):
@@ -115,7 +115,7 @@ def _build_value_for_union(union: Type, data: Any, config: Config) -> Any:
                     union_matches[inner_type] = value
                 else:
                     return value
-        except DaciteError:
+        except TonaliteError:
             pass
     if config.strict_unions_match:
         if len(union_matches) > 1:

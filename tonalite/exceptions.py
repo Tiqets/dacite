@@ -5,11 +5,11 @@ def _name(type_: Type) -> str:
     return type_.__name__ if hasattr(type_, "__name__") else str(type_)
 
 
-class DaciteError(Exception):
+class TonaliteError(Exception):
     pass
 
 
-class DaciteFieldError(DaciteError):
+class TonaliteFieldError(TonaliteError):
     def __init__(self, field_path: Optional[str] = None):
         super().__init__()
         self.field_path = field_path
@@ -21,7 +21,7 @@ class DaciteFieldError(DaciteError):
             self.field_path = parent_field_path
 
 
-class WrongTypeError(DaciteFieldError):
+class WrongTypeError(TonaliteFieldError):
     def __init__(self, field_type: Type, value: Any, field_path: Optional[str] = None) -> None:
         super().__init__(field_path=field_path)
         self.field_type = field_type
@@ -34,7 +34,7 @@ class WrongTypeError(DaciteFieldError):
         )
 
 
-class MissingValueError(DaciteFieldError):
+class MissingValueError(TonaliteFieldError):
     def __init__(self, field_path: Optional[str] = None):
         super().__init__(field_path=field_path)
 
@@ -50,7 +50,7 @@ class UnionMatchError(WrongTypeError):
         )
 
 
-class StrictUnionMatchError(DaciteFieldError):
+class StrictUnionMatchError(TonaliteFieldError):
     def __init__(self, union_matches: Dict[Type, Any], field_path: Optional[str] = None) -> None:
         super().__init__(field_path=field_path)
         self.union_matches = union_matches
@@ -60,7 +60,7 @@ class StrictUnionMatchError(DaciteFieldError):
         return f'can not choose between possible Union matches for field "{self.field_path}": {conflicting_types}'
 
 
-class ForwardReferenceError(DaciteError):
+class ForwardReferenceError(TonaliteError):
     def __init__(self, message: str) -> None:
         super().__init__()
         self.message = message
@@ -69,7 +69,7 @@ class ForwardReferenceError(DaciteError):
         return f"can not resolve forward reference: {self.message}"
 
 
-class UnexpectedDataError(DaciteError):
+class UnexpectedDataError(TonaliteError):
     def __init__(self, keys: Set[str]) -> None:
         super().__init__()
         self.keys = keys

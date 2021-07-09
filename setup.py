@@ -1,14 +1,14 @@
 from setuptools import setup
 
 setup(
-    name="dacite",
-    version="1.6.0",
+    name="tonalite",
+    version="1.7.0",
     description="Simple creation of data classes from dictionaries.",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
-    author="Konrad Hałas",
-    author_email="halas.konrad@gmail.com",
-    url="https://github.com/konradhalas/dacite",
+    author="Konrad Hałas & Tiqets",
+    author_email="connections@tiqets.com",
+    url="https://github.com/Tiqets/tonalite",
     license="MIT",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
@@ -24,8 +24,8 @@ setup(
     ],
     python_requires=">=3.6",
     keywords="dataclasses",
-    packages=["dacite"],
-    package_data={"dacite": ["py.typed"]},
+    packages=["tonalite"],
+    package_data={"tonalite": ["py.typed"]},
     install_requires=['dataclasses;python_version<"3.7"'],
     extras_require={"dev": ["pytest>=5", "pytest-cov", "coveralls", "black", "mypy", "pylint"]},
 )
