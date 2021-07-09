@@ -5,7 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.2] - 2021-07-09
+
+- Fix for using a custom `from_dict` in the data classes
+
 ## [1.7.0] - 2021-07-09
+
+- Rebranding (dacite -> tonalite)
 
 ## [1.6.0] - 2020-11-30
 
