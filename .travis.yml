@@ -8,10 +8,10 @@ python:
 install:
 - pip install -e .[dev]
 script:
-- pytest --cov=dacite
+- pytest --cov=tonalite
 - black --check .
-- mypy dacite
-- pylint dacite
+- mypy tonalite
+- pylint tonalite
 after_success:
   coveralls
 stages:
