@@ -1,7 +1,5 @@
 # tonalite
 
-[![Build Status](https://travis-ci.org/konradhalas/tonalite.svg?branch=master)](https://travis-ci.org/konradhalas/tonalite)
-[![Coverage Status](https://coveralls.io/repos/github/konradhalas/tonalite/badge.svg?branch=master)](https://coveralls.io/github/konradhalas/tonalite?branch=master)
 [![License](https://img.shields.io/pypi/l/tonalite.svg)](https://pypi.python.org/pypi/tonalite/)
 [![Version](https://img.shields.io/pypi/v/tonalite.svg)](https://pypi.python.org/pypi/tonalite/)
 [![Python versions](https://img.shields.io/pypi/pyversions/tonalite.svg)](https://pypi.python.org/pypi/tonalite/)
@@ -527,8 +525,7 @@ Follow `tonalite` updates in [CHANGELOG][changelog].
 
 ## Authors
 
-Originally Created by [Konrad Hałas][halas-homepage].
+Originally created by [Konrad Hałas][https://konradhalas.pl].
 
 [pep-557]: https://www.python.org/dev/peps/pep-0557/
-[halas-homepage]: https://konradhalas.pl
 [changelog]: https://github.com/Tiqets/tonalite/blob/master/CHANGELOG.md
