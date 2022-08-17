@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="tonalite",
-    version="1.7.2",
+    version="1.7.3",
     description="Simple creation of data classes from dictionaries.",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",

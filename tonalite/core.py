@@ -26,6 +26,7 @@ from tonalite.types import (
     extract_origin_collection,
     is_init_var,
     extract_init_var,
+    is_set,
 )
 
 T = TypeVar("T")
@@ -54,7 +55,7 @@ def from_dict(data_class: Type[T], data: Data, config: Optional[Config] = None) 
     for field in data_class_fields:
         field = copy.copy(field)
         field.type = data_class_hints[field.name]
-        try:
+        if field.name in data:
             try:
                 field_data = data[field.name]
                 transformed_value = transform_value(
@@ -66,7 +67,7 @@ def from_dict(data_class: Type[T], data: Data, config: Optional[Config] = None) 
                 raise
             if config.check_types and not is_instance(value, field.type):
                 raise WrongTypeError(field_path=field.name, field_type=field.type, value=value)
-        except KeyError:
+        else:
             try:
                 value = get_default_value_for_field(field)
             except DefaultValueNotFoundError:
@@ -86,11 +87,17 @@ def _build_value(type_: Type, data: Any, config: Config) -> Any:
         type_ = extract_init_var(type_)
     if is_union(type_):
         return _build_value_for_union(union=type_, data=data, config=config)
-    elif is_generic_collection(type_) and is_instance(data, extract_origin_collection(type_)):
-        return _build_value_for_collection(collection=type_, data=data, config=config)
+    elif is_generic_collection(type_):
+        origin = extract_origin_collection(type_)
+        if is_instance(data, origin):
+            return _build_value_for_collection(collection=type_, data=data, config=config)
+        if is_set(origin):
+            return origin(
+                _build_value(type_=extract_generic(type_)[0], data=single_val, config=config) for single_val in data
+            )
     elif is_dataclass(type_) and is_instance(data, Data):
         if hasattr(type_, "from_dict"):
-            return type_.from_dict(data=data, config=config)
+            return type_.from_dict(data_class=type_, data=data, config=config)
         return from_dict(data_class=type_, data=data, config=config)
     return data
 
