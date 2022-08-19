@@ -224,10 +224,11 @@ def test_custom_from_dict_in_nested_data_class():
         d: date
         t: str
 
-        def from_dict(data_class, data, config):
+        @classmethod
+        def from_dict(cls, data, config):
             data["t"] = "prefix {}".format(data["t"])
             return from_dict(
-                data_class=data_class,
+                data_class=cls,
                 data=data,
                 config=Config(type_hooks={date: date.fromtimestamp}),
             )
