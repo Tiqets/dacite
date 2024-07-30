@@ -1,4 +1,3 @@
-import sys
 from dataclasses import InitVar
 from typing import Optional, Union, List, Any, Dict, NewType, TypeVar, Generic, Collection, Tuple, Type
 from unittest.mock import patch, Mock
@@ -402,7 +401,7 @@ def test_extract_generic_special():
     assert extract_generic(FakeType, defaults) == defaults
 
 
+@pep_604_support
 def test_optional_and_union_none_does_not_pollute_scope_via_caching():
     is_generic(Optional[str])
-    if sys.version_info >= (3, 9):
-        is_generic_collection(str | None)
+    is_generic_collection(str | None)
