@@ -2,7 +2,7 @@ name: Code Check
 
 on:
   pull_request:
-    types: [ opened, reopened, synchronize, edited, closed ]
+    types: [opened, reopened, synchronize, edited, closed]
   push:
     branches:
       - master
@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ '3.7', '3.8', '3.9', '3.10' ]
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
 
     name: Python ${{ matrix.python-version }}
     steps:
@@ -25,10 +25,10 @@ jobs:
       - name: Install dependencies
         run: pip install -e ".[dev]"
       - name: Testing Check
-        run: pytest --cov=dacite
+        run: pytest --cov=tonalite
       - name: Formatting Check
         run: black --check .
       - name: Typing Check
-        run: mypy dacite
+        run: mypy tonalite
       - name: Linting Check
-        run: pylint dacite
+        run: pylint tonalite

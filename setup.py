@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="tonalite",
-    version="1.7.4",
+    version="1.8.3",
     description="Simple creation of data classes from dictionaries.",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
@@ -20,6 +20,9 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
     python_requires=">=3.6",
@@ -27,5 +30,5 @@ setup(
     packages=["tonalite"],
     package_data={"tonalite": ["py.typed"]},
     install_requires=['dataclasses;python_version<"3.7"'],
-    extras_require={"dev": ["pytest>=5", "pytest-cov", "coveralls", "black", "mypy", "pylint"]},
+    extras_require={"dev": ["pytest>=5", "pytest-benchmark", "pytest-cov", "coveralls", "black", "mypy", "pylint"]},
 )

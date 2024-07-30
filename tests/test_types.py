@@ -1,5 +1,6 @@
 from dataclasses import InitVar
 from typing import Optional, Union, List, Any, Dict, NewType, TypeVar, Generic, Collection, Tuple, Type
+from unittest.mock import patch, Mock
 
 import pytest
 
@@ -14,14 +15,18 @@ from tonalite.types import (
     extract_generic,
     is_new_type,
     extract_new_type,
-    transform_value,
     is_literal,
     is_init_var,
     extract_init_var,
     is_type_generic,
-    is_set,
+    is_tuple,
 )
-from tests.common import literal_support, init_var_type_support
+from tests.common import (
+    literal_support,
+    init_var_type_support,
+    pep_604_support,
+    type_hints_with_generic_collections_support,
+)
 
 
 def test_is_union_with_union():
@@ -30,6 +35,47 @@ def test_is_union_with_union():
 
 def test_is_union_with_non_union():
     assert not is_union(int)
+
+
+def test_is_union_with_import_error():
+    with patch("builtins.__import__") as mock_import:
+        mock_import.side_effect = ImportError()
+        assert not is_union(str)
+
+
+def test_is_tuple_with_tuple():
+    assert is_tuple(Tuple[int, float, str])
+
+
+def test_is_tuple_with_variable_length_tuple():
+    assert is_tuple(Tuple[int, ...])
+
+
+def test_is_tuple_with_not_parametrized_tuple():
+    assert is_tuple(Tuple)
+
+
+def test_is_tuple_with_tuple_class_object():
+    assert is_tuple(tuple)
+
+
+@type_hints_with_generic_collections_support
+def test_is_tuple_with_tuple_generic():
+    assert is_tuple(tuple[int, float, str])
+
+
+@type_hints_with_generic_collections_support
+def test_is_tuple_with_variable_length_tuple_generic():
+    assert is_tuple(tuple[int, ...])
+
+
+def test_is_tuple_with_non_tuple():
+    assert not is_tuple(int)
+
+
+@pep_604_support
+def test_is_union_with_pep_604_union():
+    assert is_union(int | float)
 
 
 @literal_support
@@ -41,6 +87,12 @@ def test_is_literal_with_literal():
 
 def test_is_literal_with_non_literal():
     assert not is_literal(int)
+
+
+def test_is_literal_with_import_error():
+    with patch("builtins.__import__") as mock_import:
+        mock_import.side_effect = ImportError()
+        assert not is_literal(str)
 
 
 def test_is_init_var_with_init_var():
@@ -63,6 +115,16 @@ def test_is_optional_with_optional_of_union():
     assert is_optional(Optional[Union[int, float]])
 
 
+@pep_604_support
+def test_is_optional_with_pep_604_union():
+    assert is_optional(int | float | None)
+
+
+@pep_604_support
+def test_is_optional_with_non_optional_pep_604_union():
+    assert not is_optional(int | float)
+
+
 def test_extract_optional():
     assert extract_optional(Optional[int]) == int
 
@@ -70,6 +132,10 @@ def test_extract_optional():
 def test_extract_optional_with_wrong_type():
     with pytest.raises(ValueError):
         extract_optional(List[None])
+
+
+def test_extract_optional_with_optional_of_union():
+    assert extract_optional(Optional[Union[int, str]]) == Union[int, str]
 
 
 def test_is_generic_with_generic():
@@ -306,78 +372,16 @@ def test_extract_generic_with_defaults():
     assert extract_generic(List, defaults=(Any,)) == (Any,)
 
 
-def test_transform_value_without_matching_type():
-    assert transform_value({}, [], str, 1) == 1
-
-
-def test_transform_value_with_matching_type():
-    assert transform_value({int: lambda x: x + 1}, [], int, 1) == 2
-
-
-def test_transform_value_with_optional_and_not_none_value():
-    assert transform_value({str: str}, [], Optional[str], 1) == "1"
-
-
-def test_transform_value_with_optional_and_none_value():
-    assert transform_value({str: str}, [], Optional[str], None) is None
-
-
-def test_transform_value_with_optional_and_exact_matching_type():
-    assert transform_value({Optional[str]: str}, [], Optional[str], None) == "None"
-
-
-def test_transform_value_with_generic_sequence_and_matching_item():
-    assert transform_value({str: str}, [], List[str], [1]) == ["1"]
-
-
-def test_transform_value_with_generic_sequence_and_matching_sequence():
-    assert transform_value({List[int]: lambda x: list(reversed(x))}, [], List[int], [1, 2]) == [2, 1]
-
-
-def test_transform_value_with_generic_sequence_and_matching_both_item_and_sequence():
-    assert transform_value({List[int]: lambda x: list(reversed(x)), int: int}, [], List[int], ["1", "2"]) == [2, 1]
-
-
-def test_transform_value_without_matching_generic_sequence():
-    assert transform_value({}, [], List[int], {1}) == {1}
-
-
-def test_transform_value_with_nested_generic_sequence():
-    assert transform_value({str: str}, [], List[List[str]], [[1]]) == [["1"]]
-
-
-def test_transform_value_with_generic_abstract_collection():
-    assert transform_value({str: str}, [], Collection[str], [1]) == ["1"]
-
-
-def test_transform_value_with_generic_mapping():
-    assert transform_value({str: str, int: int}, [], Dict[str, int], {1: "2"}) == {"1": 2}
-
-
-def test_transform_value_with_nested_generic_mapping():
-    assert transform_value({str: str, int: int}, [], Dict[str, Dict[str, int]], {1: {2: "3"}}) == {"1": {"2": 3}}
-
-
-def test_transform_value_with_new_type():
-    MyStr = NewType("MyStr", str)
-
-    assert transform_value({MyStr: str.upper, str: str.lower}, [], MyStr, "Test") == "TEST"
-
-
-def test_transform_value_with_cast_matching_type():
-    assert transform_value({}, [int], int, "1") == 1
-
-
-def test_transform_value_with_cast_matching_base_class():
-    class MyInt(int):
-        pass
-
-    assert transform_value({}, [int], MyInt, "1") == 1
-
-
 @init_var_type_support
 def test_extract_init_var():
     assert extract_init_var(InitVar[int]) == int
+
+
+def test_extract_init_var_with_attribute_error():
+    class FakeType:
+        pass
+
+    assert extract_init_var(FakeType) == Any
 
 
 def test_is_type_generic_with_matching_value():
@@ -388,31 +392,15 @@ def test_is_type_generic_with_not_matching_value():
     assert not is_type_generic(int)
 
 
-def test_is_set_set_class():
-    assert is_set(set)
+def test_extract_generic_special():
+    defaults = 1, 2
+
+    class FakeType:
+        _special = True
+
+    assert extract_generic(FakeType, defaults) == defaults
 
 
-def test_is_set_frozentset_class():
-    assert is_set(frozenset)
-
-
-def test_is_set_set_object():
-    obj = {1, 2, 3}
-    assert is_set(obj)
-
-
-def test_is_set_frozentset_object():
-    obj = frozenset({1, 2, 3})
-    assert is_set(obj)
-
-
-def test_is_set_list_class():
-    assert not is_set(list)
-
-
-def test_is_set_int_class():
-    assert not is_set(int)
-
-
-def test_is_set_union():
-    assert not is_set(Union[int, float])
+def test_optional_and_union_none_does_not_pollute_scope_via_caching():
+    is_generic(Optional[str])
+    is_generic_collection(str | None)

@@ -8,7 +8,7 @@
 This module simplifies creation of data classes ([PEP 557][pep-557])
 from dictionaries.
 
-**Tonalite is a fork of [dacite](https://github.com/Tiqets/dacite) as it wasn't maintain for a log time.**
+**Tonalite is a fork of [dacite](https://github.com/konradhalas/dacite) as it wasn't maintain for a log time.**
 
 ## Installation
 

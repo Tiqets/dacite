@@ -34,6 +34,16 @@ def test_from_dict_with_type_hooks_and_optional():
     assert result == X(s="test")
 
 
+def test_from_dict_with_type_hooks_and_optional_null_value():
+    @dataclass
+    class X:
+        s: Optional[str]
+
+    result = from_dict(X, {"s": None}, Config(type_hooks={str: str.lower}))
+
+    assert result == X(s=None)
+
+
 def test_from_dict_with_type_hooks_and_union():
     @dataclass
     class X:
@@ -224,11 +234,10 @@ def test_custom_from_dict_in_nested_data_class():
         d: date
         t: str
 
-        @classmethod
-        def from_dict(cls, data, config):
+        def from_dict(data_class, data, config):
             data["t"] = "prefix {}".format(data["t"])
             return from_dict(
-                data_class=cls,
+                data_class=data_class,
                 data=data,
                 config=Config(type_hooks={date: date.fromtimestamp}),
             )

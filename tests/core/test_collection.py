@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Set, Union, Dict, Collection, Tuple
+from typing import List, Set, Union, Dict, Collection, Tuple, Sequence
 
 import pytest
 
@@ -78,42 +78,32 @@ def test_from_dict_with_set_strings():
     assert result == X(i_set={"a", "b"})
 
 
-def test_from_dict_with_set_classes():
+def test_from_dict_with_cast_of_both_collection_and_inner_type():
+    @dataclass
+    class X:
+        set_int: Set[int]
+
+    data = {"set_int": ["1", "2"]}
+
+    result = from_dict(data_class=X, data=data, config=Config(cast=[set, int]))
+
+    assert result == X(set_int={1, 2})
+
+
+def test_from_dict_with_set_of_dataclasses():
     @dataclass(frozen=True)
     class A:
-        x: int
+        i: int
 
     @dataclass
-    class SetOfA:
+    class X:
         set_a: Set[A]
 
-    data = {"set_a": [{"x": 1}, {"x": 2}]}
+    data = {"set_a": [{"i": 1}, {"i": 2}]}
 
-    result = from_dict(data_class=SetOfA, data=data, config=Config(cast=[set]))
+    result = from_dict(data_class=X, data=data, config=Config(cast=[set]))
 
-    assert result == SetOfA({A(1), A(2)})
-
-
-def test_from_dict_with_nested_set_classes():
-    @dataclass(frozen=True)
-    class A:
-        x: int
-
-    @dataclass
-    class SetOfA:
-        set_a: Set[A]
-
-        def __hash__(self) -> int:
-            return hash(sum(ob.x for ob in self.set_a))
-
-    @dataclass
-    class SetOfSetOfA:
-        set_set_a: Set[SetOfA]
-
-    data = {"set_set_a": [{"set_a": [{"x": 1}, {"x": 2}]}]}
-    result = from_dict(data_class=SetOfSetOfA, data=data, config=Config(cast=[set]))
-
-    assert result == SetOfSetOfA(set_set_a={SetOfA(set_a={A(x=1), A(x=2)})})
+    assert result == X(set_a={A(i=1), A(i=2)})
 
 
 def test_from_dict_with_dict():
@@ -269,3 +259,23 @@ def test_from_dict_with_tuple_and_implicit_any_types():
     result = from_dict(X, {"t": (1, 2, 3)})
 
     assert result == X(t=(1, 2, 3))
+
+
+def test_from_dict_with_sequence_and_tuple():
+    @dataclass
+    class X:
+        s: Sequence[int]
+
+    result = from_dict(X, {"s": (1, 2, 3)})
+
+    assert result == X(s=(1, 2, 3))
+
+
+def test_from_dict_with_sequence_and_empty_tuple():
+    @dataclass
+    class X:
+        s: Sequence[int]
+
+    result = from_dict(X, {"s": ()})
+
+    assert result == X(s=())

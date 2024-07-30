@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Any, NewType
+from typing import Any, NewType, Optional, List
 
 import pytest
 
@@ -158,6 +158,29 @@ def test_from_dict_with_post_init_missing_value():
     assert not hasattr(result, "s")
 
 
+def test_from_dict_with_optional_non_init_field():
+    @dataclass
+    class X:
+        s: Optional[str] = field(init=False)
+
+    x = X()
+    x.s = None
+
+    result = from_dict(X, {})
+
+    assert result == x
+
+
+def test_from_dict_with_non_init_field_with_default_value_and_frozen_dataclass():
+    @dataclass(frozen=True)
+    class X:
+        s: str = field(init=False, default="test")
+
+    result = from_dict(X, {})
+
+    assert result == X()
+
+
 def test_from_dict_with_new_type():
     MyStr = NewType("MyStr", str)
 
@@ -168,3 +191,16 @@ def test_from_dict_with_new_type():
     result = from_dict(X, {"s": "test"})
 
     assert result == X(s=MyStr("test"))
+
+
+def test_dataclass_default_factory_identity():
+    # https://github.com/konradhalas/dacite/issues/215
+    @dataclass
+    class A:
+        name: str
+        items: List[str] = field(default_factory=list)
+
+    a1 = from_dict(A, {"name": "a1"})
+    a2 = from_dict(A, {"name": "a2"})
+
+    assert a1.items is not a2.items
