@@ -97,7 +97,7 @@ def _build_value(type_: Type, data: Any, config: Config) -> Any:
         data = _build_value_for_collection(collection=type_, data=data, config=config)
     elif cache(is_dataclass)(type_) and isinstance(data, Mapping):
         if hasattr(type_, "from_dict"):
-            data = type_.from_dict(data_class=type_, data=data, config=config)
+            data = type_.from_dict(data=data, config=config)
         else:
             data = from_dict(data_class=type_, data=data, config=config)
     for cast_type in config.cast:
